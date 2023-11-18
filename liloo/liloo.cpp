@@ -84,6 +84,13 @@ namespace utils {
             queue_has_task_.notify_one();
         }
 
+        void EnqueueTask(std::function<void()> target) {
+            std::unique_lock lock(queue_mut_);
+            // tasks_queue_.push(std::move(task));
+            tasks_queue_.emplace(std::move(target));
+            queue_has_task_.notify_one();
+        }
+
         ~TaskProcessor() {
             running_ = false;
             {
@@ -143,20 +150,46 @@ namespace liloo {
     typedef uint64_t EventId;
 
     class CompletitionQueue {
-        std::vector<
-            std::pair<EventId,std::function<pybind11::object()>>
-        > task_results_;
-
+        std::vector< std::pair<EventId, std::function<pybind11::object()>> > task_results_;
         std::mutex task_results_mut_;
 
         EventFd events_queue_;
         std::atomic<EventId> event_counter_;
     public:
+
+        class Promise {
+        private:
+            EventId event_id_;
+            CompletitionQueue& cq_;
+
+        public:
+            Promise(CompletitionQueue& cq, EventId event_id) : event_id_(event_id), cq_(cq) { }
+
+            void Resolve(std::function<pybind11::object()> callback) const {
+                cq_.AppendTaskResult(event_id_, std::move(callback));
+            }
+
+            void Reject(std::function<pybind11::object()> callback) const {
+                cq_.AppendTaskResult(event_id_, std::move(callback));
+            }
+
+            EventId GetEventId() const {
+                return event_id_;
+            }
+        };
+
+        typedef EventId Future;
+
         CompletitionQueue() = default;
 
         static CompletitionQueue& Instance() {
             static CompletitionQueue cq;
             return cq;
+        }
+
+        std::pair<Promise, Future> MakeContract() {
+            const auto event_id = GenerateEventId();
+            return { Promise(*this, event_id), event_id };
         }
 
         pybind11::object GetCompletedResults() {
@@ -179,6 +212,8 @@ namespace liloo {
         }
 
         void AppendTaskResult(EventId event_id, std::function<pybind11::object()> callback) {
+            // TODO: Use move semantic for callback
+
             std::unique_lock lock(task_results_mut_);
             task_results_.emplace_back(event_id, std::move(callback));
             events_queue_.Notify();
@@ -192,43 +227,45 @@ namespace liloo {
             return ++event_counter_;
         }
     };
+
+    typedef CompletitionQueue::Future Future;
 }
+
+
 
 class Model {
 private:
     utils::TaskProcessor processor_;
 
 public:
-    liloo::EventId forward() {
-        const auto event_id = liloo::CompletitionQueue::Instance().GenerateEventId();
+    liloo::Future forward() {
+        auto [promise, future] = liloo::CompletitionQueue::Instance().MakeContract();
 
-        std::function<void()> fn = [event_id]() {
+        processor_.EnqueueTask([promise]() {
+
+            const auto event_id = promise.GetEventId();
+
             std::cout << "Start task" << event_id << '\n';
             std::this_thread::sleep_for(std::chrono::seconds(1));
             
-            liloo::CompletitionQueue::Instance().AppendTaskResult(event_id, [event_id](){
-                return pybind11::cast("TaskResult-" + std::to_string(event_id));
-            });
-        };
-
-        processor_.EnqueueTask(std::move(fn));
-        return event_id;
+            promise.Resolve([event_id](){ return pybind11::cast("TaskResult-" + std::to_string(event_id)); });
+        });
+        return future;
     }
 
-    liloo::EventId initialize() {
-        const auto event_id = liloo::CompletitionQueue::Instance().GenerateEventId();
+    liloo::Future initialize(std::string configuration) {
+        auto [promise, future] = liloo::CompletitionQueue::Instance().MakeContract();
 
-        std::function<void()> fn = [event_id]() {
-            std::cout << "Start initialization" << event_id << '\n';
+        processor_.EnqueueTask([promise, configuration = std::move(configuration)]() {
+
+            const auto event_id = promise.GetEventId();
+
+            std::cout << "Start initialization: " << configuration << " " << event_id << '\n';
             std::this_thread::sleep_for(std::chrono::seconds(2));
             
-            liloo::CompletitionQueue::Instance().AppendTaskResult(event_id, [event_id](){
-                return pybind11::cast("initialization-result-" + std::to_string(event_id));
-            });
-        };
-
-        processor_.EnqueueTask(std::move(fn));
-        return event_id;
+            promise.Resolve([event_id](){ return pybind11::cast("initialization-result-" + std::to_string(event_id)); });
+        });
+        return future;
     }
 };
 

@@ -43,8 +43,8 @@ class EventLoop:
         
         Return `asyncio.Future` that resolves by event loop notification.
         """
-        def fn(ctx):
-            event_id = target_func(ctx)
+        def fn(*args, **kwargs):
+            event_id = target_func(*args, **kwargs)
             if event_id in self.futures:
                 raise RuntimeError(f'event {event_id} already registered')
             future = asyncio.Future()
@@ -59,16 +59,16 @@ cq = EventLoop()
 
 
 class Model:
-    def __init__(self) -> None:
-        self._impl = ie.Model()
+    def __init__(self, *args, **kwargs) -> None:
+        self._impl = ie.Model(*args, **kwargs)
 
     @cq.futurise
-    def forward(self):
-        return self._impl.forward()
+    def forward(self, *args, **kwargs):
+        return self._impl.forward(*args, **kwargs)
 
     @cq.futurise
-    def initialize(self):
-        return self._impl.initialize()
+    def initialize(self, *args, **kwargs):
+        return self._impl.initialize(*args, **kwargs)
 
 
 async def main():
@@ -81,7 +81,7 @@ async def main():
         res = await model.forward()
         print(res)
 
-    print(await model.initialize())
+    print(await model.initialize('model-1'))
 
     await asyncio.gather(
         asyncio.create_task(task()),
