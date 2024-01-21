@@ -211,6 +211,15 @@ namespace liloo {
             return pybind11::cast(results);
         }
 
+        /*
+            Arguments
+            ---------
+
+            `callback` - function that will be called later with aquired
+            GIL (Creating python object possible only with GIL). Should work as fast as possible
+            and has not got system calls (That will block python event loop).
+
+        */
         void AppendTaskResult(EventId event_id, std::function<pybind11::object()> callback) {
             // TODO: Use move semantic for callback
 

@@ -1,8 +1,8 @@
-Installing
-----
+Develop installation
+--------------------
 
-Clone repository and clone pybind11.
-Use command from `Makefile` to build and test project.
+- Clone repository and clone pybind11.
+- Use command from `Makefile` to build and test project.
 
 
 
@@ -18,9 +18,39 @@ TODO
 5. Append generic type hints like `Future<std::string>` for returning type like `Future[str]`. Mb using `pybind11_generic` library.
 
 
+
 Generate interface file (`.pyi`)
-----
+--------------------------------
+
 ```
 stubgen --module asyncie --output .
 ```
+
+
+
+Integration
+-----------
+
+- Generate CPP module using CMake `add_liloo_module()` function
+- Install `liloo` package using `pip`
+
+
+
+Architecture
+------------
+
+```txt
+
+liloo.py - CompletitionQueue wraped singleton instance + `futurize()` method
+libliloo.so - CompletitionQueue implementation (Could be split to CompletitionQueue.so and python module)
+
+test_module.py
+libtest_module.so
+```
+
+
+Sources
+-------
+
+https://stackoverflow.com/questions/37531846/nm-symbol-output-t-vs-t-in-a-shared-so-library
 
