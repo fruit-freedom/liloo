@@ -1,0 +1,7 @@
+__pycache__
+build
+liloo/libliloo.pyi
+liloo/libliloo.so
+test_module/build
+test_module/libtest_module.pyi
+test_module/libtest_module.so
