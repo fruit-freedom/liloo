@@ -1,9 +1,8 @@
 Develop installation
 --------------------
 
-- Clone repository and clone pybind11.
 - Use command from `Makefile` to build and test project.
-
+- `pip install -r requirements.txt`
 
 
 TODO
@@ -40,7 +39,6 @@ Architecture
 ------------
 
 ```txt
-
 liloo.py - CompletitionQueue wraped singleton instance + `futurize()` method
 libliloo.so - CompletitionQueue implementation (Could be split to CompletitionQueue.so and python module)
 
@@ -53,4 +51,15 @@ Sources
 -------
 
 https://stackoverflow.com/questions/37531846/nm-symbol-output-t-vs-t-in-a-shared-so-library
+
+
+
+Develop
+-------
+
+```
+
+```
+
+
 

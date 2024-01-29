@@ -23,5 +23,14 @@ setup(
     },
     zip_safe=False,
     python_requires=">=3.8",
-    packages=find_packages(),
+    packages=[
+        'liloo',
+        'include'
+    ],
+    # data_files=[('include', ['requirements.txt'])]
+    package_data={
+        'liloo': ['core.h'],
+        'include': ['core.h']
+    },
+    # include_package_data=True
 )
