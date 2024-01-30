@@ -7,21 +7,27 @@ set(CMAKE_SHARED_LIBRARY_PREFIX "")
 find_package(Python REQUIRED COMPONENTS Interpreter Development)
 message(STATUS "Find Python executable: ${Python_EXECUTABLE}")
 message(STATUS "Find Python site-packages: ${Python_SITELIB}")
-message(STATUS "Find Python liloo: ${Python_SITELIB}/liloo")
-message(STATUS "Find Python pybind11: ${Python_SITELIB}/pybind11")
+message(STATUS "Find Python liloo: ${Python_SITELIB}/pybind11")
 
 list(APPEND CMAKE_PREFIX_PATH ${Python_SITELIB}/pybind11)
 find_package(pybind11 REQUIRED)
 
 pybind11_add_module(libliloo liloo/core.cpp)
 
-include_directories(
-    ${CMAKE_SOURCE_DIR}/include
+target_include_directories(libliloo PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include> # for headers when building
+    $<INSTALL_INTERFACE:include>                  # for client in install mode
 )
 
-# add_library(asyncie SHARED liloo/liloo.cpp)
-# include_directories(
-#     ${Python_INCLUDE_DIRS}
-#     ${pybind11_INCLUDE_DIR}
-# )
-# link_libraries(${Python_LIBRARIES})
+set_target_properties(libliloo PROPERTIES PUBLIC_HEADER
+    "include/liloo/core.h"
+)
+
+include(GNUInstallDirs)
+install(TARGETS libliloo
+    EXPORT libliloo
+    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/liloo
+    LIBRARY DESTINATION lib
+)
+install(FILES cmake/libliloo-config.cmake DESTINATION lib/libliloo)
+install(EXPORT libliloo DESTINATION lib/libliloo)

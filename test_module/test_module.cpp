@@ -6,7 +6,7 @@
 #include <condition_variable>
 #include <mutex>
 
-#include "../liloo/core.h"
+#include <liloo/core.h>
 
 namespace utils {
 

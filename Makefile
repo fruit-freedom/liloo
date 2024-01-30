@@ -2,7 +2,7 @@
 build:
 	cmake --build build
 	cp build/libliloo.so liloo
-	cd liloo; stubgen --module libliloo --output .
+	# cd liloo; stubgen --module libliloo --output .
 
 .PHONY: build-init
 build-init:

@@ -14,7 +14,7 @@
 #endif
 
 
-namespace liloo {
+namespace liloo __attribute__((visibility("default"))) {
 
     class EventFd {
     private:

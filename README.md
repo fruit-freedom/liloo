@@ -56,10 +56,11 @@ https://stackoverflow.com/questions/37531846/nm-symbol-output-t-vs-t-in-a-shared
 
 Develop
 -------
+Build package
+```bash
+# Develop
+python setup.py build
 
+# Wheel
+python setup.py bdist_wheel
 ```
-
-```
-
-
-

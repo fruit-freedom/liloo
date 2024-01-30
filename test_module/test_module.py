@@ -1,7 +1,9 @@
 import asyncio
 
 import liloo
-from . import libtest_module
+# from . import libtest_module
+import libtest_module
+
 
 class Model:
     def __init__(self, *args, **kwargs) -> None:

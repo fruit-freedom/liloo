@@ -1,5 +1,3 @@
-#include "core.h"
-
 #include <map>
 #include <mutex>
 #include <iostream>
@@ -12,6 +10,8 @@
 #else
     #include <unistd.h>
 #endif
+
+#include <liloo/core.h>
 
 namespace liloo {
 

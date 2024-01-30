@@ -6,3 +6,5 @@ test_module/build
 test_module/libtest_module.pyi
 test_module/libtest_module.so
 venv
+dist
+liloo.egg-info
