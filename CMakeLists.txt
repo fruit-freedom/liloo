@@ -12,7 +12,9 @@ message(STATUS "Find Python liloo: ${Python_SITELIB}/pybind11")
 list(APPEND CMAKE_PREFIX_PATH ${Python_SITELIB}/pybind11)
 find_package(pybind11 REQUIRED)
 
-pybind11_add_module(libliloo liloo/core.cpp)
+# Required to use `SHARED` library instead of `MODULE` (by default)
+# Because later library should be linked and worked opened with `dlopen`
+pybind11_add_module(libliloo SHARED liloo/core.cpp)
 
 target_include_directories(libliloo PUBLIC
     $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include> # for headers when building
